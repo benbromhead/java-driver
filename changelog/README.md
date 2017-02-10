@@ -5,6 +5,15 @@
 - [new feature] JAVA-1347: Add support for duration type.
 - [new feature] JAVA-1248: Implement "beta" flag for native protocol v5.
 - [new feature] JAVA-1362: Send query options flags as [int] for Protocol V5+.
+- [improvement] JAVA-1367: Make protocol negotiation more resilient.
+- [bug] JAVA-1397: Handle duration as native datatype in protocol v5+.
+
+Merged from 3.1.x branch:
+
+- [bug] JAVA-1371: Reintroduce connection pool timeout.
+- [bug] JAVA-1313: Copy SerialConsistencyLevel to PreparedStatement.
+- [documentation] JAVA-1334: Clarify documentation of method `addContactPoints`.
+- [improvement] JAVA-1357: Document that getReplicas only returns replicas of the last token in range.
 
 
 ### 3.1.3
