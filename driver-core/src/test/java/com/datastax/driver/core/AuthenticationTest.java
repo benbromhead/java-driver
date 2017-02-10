@@ -55,7 +55,7 @@ public class AuthenticationTest extends CCMTestsSupport {
                 .withAuthProvider(authProvider)
                 .build();
         cluster.connect();
-        verify(authProvider, atLeastOnce()).newAuthenticator(findHost(cluster, 1).getSocketAddress(), "org.apache.cassandra.auth.PasswordAuthenticator");
+        verify(authProvider, atLeastOnce()).newAuthenticator(findHost(cluster, 1).getSocketAddress(), "org.apache.cassandra.auth.PasswordAuthenticator", ProtocolVersion.NEWEST_BETA);
         assertThat(cluster.getMetrics().getErrorMetrics().getAuthenticationErrors().getCount()).isEqualTo(0);
     }
 
