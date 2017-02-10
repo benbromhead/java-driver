@@ -15,10 +15,12 @@
  */
 package com.datastax.driver.core;
 
+import com.datastax.driver.core.exceptions.AuthenticationException;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -79,8 +81,12 @@ public class PlainTextAuthProvider implements AuthProvider {
      * authentication negotiations on behalf of the client
      */
     @Override
-    public Authenticator newAuthenticator(InetSocketAddress host, String authenticator) {
-        return new PlainTextAuthenticator(username, password);
+    public Authenticator newAuthenticator(InetSocketAddress host, String authenticator, ProtocolVersion version) {
+        //TODO: rename authenticator string to supportedSASLmechanisms
+        if(ProtocolVersion.V5 == version)
+            return new PlainTextAuthenticatorV2(username, password, host, authenticator);
+
+        return new PlainTextAuthenticator(username, password, host);
     }
 
     /**
@@ -88,24 +94,57 @@ public class PlainTextAuthProvider implements AuthProvider {
      * perform authentication against Cassandra servers configured
      * with PasswordAuthenticator.
      */
-    private static class PlainTextAuthenticator extends ProtocolV1Authenticator implements Authenticator {
 
-        private final byte[] username;
-        private final byte[] password;
+    private static class PlainTextAuthenticatorV2 extends PlainTextAuthenticator {
+        private static final byte[] SASL_MECHANISM = "PLAIN".getBytes();
+        private final String saslMechanisms;
 
-        public PlainTextAuthenticator(String username, String password) {
-            this.username = username.getBytes(Charsets.UTF_8);
-            this.password = password.getBytes(Charsets.UTF_8);
+        public PlainTextAuthenticatorV2(String username, String password, InetSocketAddress host, String saslMechanisms) {
+            super(username, password, host);
+            this.saslMechanisms = saslMechanisms;
         }
 
         @Override
         public byte[] initialResponse() {
+            //Don't try to negotiate as PlainTextAuthenticatorV2 only supports PLAIN
+            return SASL_MECHANISM;
+        }
+
+        @Override
+        public byte[] evaluateChallenge(byte[] challenge) {
+            if(Arrays.equals(challenge, SASL_MECHANISM)) {
+                return getUserPasswordBytes();
+            } else {
+                throw new AuthenticationException(host, "Unsupported SASL mechanism: " + new String(challenge));
+            }
+        }
+    }
+
+
+    private static class PlainTextAuthenticator extends ProtocolV1Authenticator implements Authenticator {
+
+        private final byte[] username;
+        private final byte[] password;
+        protected final InetSocketAddress host;
+
+        public PlainTextAuthenticator(String username, String password, InetSocketAddress host) {
+            this.username = username.getBytes(Charsets.UTF_8);
+            this.password = password.getBytes(Charsets.UTF_8);
+            this.host = host;
+        }
+
+        protected byte[] getUserPasswordBytes() {
             byte[] initialToken = new byte[username.length + password.length + 2];
             initialToken[0] = 0;
             System.arraycopy(username, 0, initialToken, 1, username.length);
             initialToken[username.length + 1] = 0;
             System.arraycopy(password, 0, initialToken, username.length + 2, password.length);
             return initialToken;
+        }
+
+        @Override
+        public byte[] initialResponse() {
+            return getUserPasswordBytes();
         }
 
         @Override

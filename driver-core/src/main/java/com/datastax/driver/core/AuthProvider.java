@@ -35,9 +35,31 @@ public interface AuthProvider {
      */
     public static final AuthProvider NONE = new AuthProvider() {
         @Override
-        public Authenticator newAuthenticator(InetSocketAddress host, String authenticator) {
+        public Authenticator newAuthenticator(InetSocketAddress host, String authenticator, ProtocolVersion version) {
             throw new AuthenticationException(host,
                     String.format("Host %s requires authentication, but no authenticator found in Cluster configuration", host));
+        }
+    };
+
+    public static final AuthProvider EXTERNAL = new AuthProvider() {
+        @Override
+        public Authenticator newAuthenticator(InetSocketAddress host, String authenticator, ProtocolVersion version) throws AuthenticationException {
+            return new Authenticator() {
+                @Override
+                public byte[] initialResponse() {
+                    return "EXTERNAL".getBytes();
+                }
+
+                @Override
+                public byte[] evaluateChallenge(byte[] challenge) {
+                    return new byte[0];
+                }
+
+                @Override
+                public void onAuthenticationSuccess(byte[] token) {
+                    //don't need to do anything
+                }
+            };
         }
     };
 
@@ -48,5 +70,5 @@ public interface AuthProvider {
      * @param authenticator the configured authenticator on the host.
      * @return The authentication implementation to use.
      */
-    public Authenticator newAuthenticator(InetSocketAddress host, String authenticator) throws AuthenticationException;
+    public Authenticator newAuthenticator(InetSocketAddress host, String authenticator, ProtocolVersion version) throws AuthenticationException;
 }
