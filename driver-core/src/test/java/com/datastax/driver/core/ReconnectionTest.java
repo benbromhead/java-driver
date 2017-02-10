@@ -268,9 +268,9 @@ public class ReconnectionTest extends CCMTestsSupport {
         }
 
         @Override
-        public Authenticator newAuthenticator(InetSocketAddress host, String authenticator) {
+        public Authenticator newAuthenticator(InetSocketAddress host, String authenticator, ProtocolVersion version) {
             count.incrementAndGet();
-            return super.newAuthenticator(host, authenticator);
+            return super.newAuthenticator(host, authenticator, version);
         }
     }
 
