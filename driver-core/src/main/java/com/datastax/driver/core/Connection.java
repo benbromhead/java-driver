@@ -255,7 +255,7 @@ class Connection {
                         Responses.Authenticate authenticate = (Responses.Authenticate) response;
                         Authenticator authenticator;
                         try {
-                            authenticator = factory.authProvider.newAuthenticator(address, authenticate.authenticator);
+                            authenticator = factory.authProvider.newAuthenticator(address, authenticate.authenticator, protocolVersion);
                         } catch (AuthenticationException e) {
                             incrementAuthErrorMetric();
                             throw e;

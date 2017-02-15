@@ -147,4 +147,20 @@
         <justification>False positive, the enclosing class is package-private so this was never exposed</justification>
     </difference>
 
+    <difference>
+        <differenceType>7004</differenceType> <!-- argument added -->
+        <className>com/datastax/driver/core/AuthProvider</className>
+        <method>com.datastax.driver.core.Authenticator newAuthenticator(java.net.InetSocketAddress, java.lang.String)</method>
+        <justification>Support a newer SASL auth mechanism</justification>
+    </difference>
+
+    <difference>
+        <differenceType>7004</differenceType> <!-- argument added -->
+        <className>com/datastax/driver/core/PlainTextAuthProvider</className>
+        <method>com.datastax.driver.core.Authenticator newAuthenticator(java.net.InetSocketAddress, java.lang.String)</method>
+        <justification>Support a newer SASL auth mechanism</justification>
+    </difference>
+
+
+
 </differences>
